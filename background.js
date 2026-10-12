@@ -1,3 +1,34 @@
+const analyses = new Map();
+
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('GD-468 Starter Extension installed.');
+  chrome.storage.local.set({ termsLensEnabled: true });
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'terms-found' && sender.tab?.id) {
+    const result = { ...message.result, url: sender.tab.url, tabId: sender.tab.id };
+    const previous = analyses.get(sender.tab.id);
+    analyses.set(sender.tab.id, result);
+
+    if (result.termsUrl && (!previous || previous.url !== result.url)) {
+      chrome.notifications.create(`terms-${sender.tab.id}`, {
+        type: 'basic',
+        iconUrl: 'icon.svg',
+        title: 'Terms Lens found the Terms',
+        message: `${result.concernCount} review area${result.concernCount === 1 ? '' : 's'} found on ${result.hostname}.`
+      });
+    }
+    return;
+  }
+
+  if (message.type === 'get-analysis') {
+    sendResponse({ result: analyses.get(message.tabId) || null });
+    return true;
+  }
+
+  if (message.type === 'clear-analysis' && message.tabId) {
+    analyses.delete(message.tabId);
+  }
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => analyses.delete(tabId));

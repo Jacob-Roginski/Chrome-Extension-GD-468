@@ -1,12 +1,13 @@
-# Chrome-Extension-GD-468
+# Terms Lens
 
-Basic working Chrome extension scaffold (Manifest V3).
+Terms Lens finds a site's Terms of Service page and flags common areas worth a closer read. Analysis runs locally in the extension; page text is not sent to a server. It is an educational review aid, not legal advice.
 
 ## Files
 
-- `manifest.json` - Extension configuration
-- `background.js` - Service worker entry point
-- `popup.html` - Basic popup UI
+- `manifest.json` - Extension configuration and permissions
+- `background.js` - Notifications and tab-level analysis cache
+- `content.js` - Terms link discovery and local text analysis
+- `popup.html` / `popup.js` - Review panel
 
 ## Load in Chrome
 
@@ -14,4 +15,6 @@ Basic working Chrome extension scaffold (Manifest V3).
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
 4. Select this repository folder:
-   `/home/runner/work/Chrome-Extension-GD-468/Chrome-Extension-GD-468`
+   `/workspaces/Chrome-Extension-GD-468`
+
+The extension works best on regular web pages. Chrome internal pages and sites that block extension scripts cannot be scanned.
