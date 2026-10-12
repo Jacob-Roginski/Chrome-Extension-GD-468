@@ -17,11 +17,16 @@ Terms Lens finds a site's Terms of Service page and flags common areas worth a c
 4. Select this repository folder:
    `/workspaces/Chrome-Extension-GD-468`
 
-## Test a site from the popup
+## Automatic site testing
 
-Click the Terms Lens toolbar icon, enter a full website link (for example,
-`https://example.com`), and click **Test site**. Terms Lens opens the site in a
-new tab; click the toolbar icon in that tab to view the local review. The
-existing popup scan also continues to work for the active tab.
+Open any regular website and click the Terms Lens toolbar icon. The extension
+automatically uses the active tab, finds a Terms of Service link, fetches that
+document, and reviews it locally. If the page has no matching link, it also
+tries common paths such as `/terms` and `/terms-of-service`.
+
+After a regular site loads, a compact in-page review panel appears
+automatically. Search engines are excluded so normal searching is not
+interrupted. The toolbar popup remains available for the full review and
+manual rescans.
 
 The extension works best on regular web pages. Chrome internal pages and sites that block extension scripts cannot be scanned.

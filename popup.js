@@ -6,24 +6,6 @@ function sendMessage(tabId, message) {
   });
 }
 
-function setFormState(message) {
-  const state = document.querySelector('#form-state');
-  state.textContent = message;
-  state.hidden = !message;
-}
-
-function normalizeSiteUrl(value) {
-  const input = value.trim();
-  const candidate = /^[a-z][a-z\d+.-]*:\/\//i.test(input) ? input : `https://${input}`;
-  const url = new URL(candidate);
-
-  if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) {
-    throw new Error('Enter a regular http or https website URL.');
-  }
-
-  return url.href;
-}
-
 function render(result) {
   const content = document.querySelector('#content');
   if (!result) {
@@ -54,19 +36,6 @@ function render(result) {
 }
 
 async function init() {
-  document.querySelector('#site-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    setFormState('');
-
-    try {
-      const url = normalizeSiteUrl(document.querySelector('#site-url').value);
-      await chrome.tabs.create({ url });
-      window.close();
-    } catch (error) {
-      setFormState(error instanceof TypeError ? 'Enter a valid website URL.' : error.message);
-    }
-  });
-
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let hostname = 'Current page';
   try {
