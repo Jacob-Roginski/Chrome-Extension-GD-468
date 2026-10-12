@@ -27,6 +27,13 @@ tries common paths such as `/terms` and `/terms-of-service`.
 After a regular site loads, a compact in-page review panel appears
 automatically. Search engines are excluded so normal searching is not
 interrupted. The toolbar popup remains available for the full review and
-manual rescans.
+manual rescans. Chrome does not allow extensions to programmatically open the
+toolbar popup, so the in-page panel is used for automatic results.
+
+Each finding includes a severity label, the specific clause text that matched,
+and focused questions to check. This is more useful than counting keywords:
+the extension first fetches the site's linked Terms page, then falls back to
+common same-site Terms paths, extracts readable text, and shows the evidence
+behind each rule. It remains a local educational review, not legal advice.
 
 The extension works best on regular web pages. Chrome internal pages and sites that block extension scripts cannot be scanned.

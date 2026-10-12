@@ -6,6 +6,16 @@ function sendMessage(tabId, message) {
   });
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[character]));
+}
+
 function render(result) {
   const content = document.querySelector('#content');
   if (!result) {
@@ -14,13 +24,13 @@ function render(result) {
   }
 
   const concerns = result.concerns || [];
-  const link = result.termsUrl ? `<p><a href="${result.termsUrl}" target="_blank">Open ${result.termsLabel || 'Terms of Service'} ↗</a></p>` : '<p class="state">No obvious Terms link was found on this page.</p>';
+  const link = result.termsUrl ? `<p><a href="${escapeHtml(result.termsUrl)}" target="_blank">Open ${escapeHtml(result.termsLabel || 'Terms of Service')} ↗</a></p>` : '<p class="state">No obvious Terms link was found on this page.</p>';
   content.innerHTML = `
     <div class="summary">
       <div class="score">${concerns.length}<small>flags</small></div>
       <div><strong>${concerns.length ? 'Worth a closer read' : 'No common flags found'}</strong><span>Based on ${result.analyzedCharacters.toLocaleString()} page characters</span></div>
     </div>
-    ${concerns.map((concern) => `<article class="concern"><strong>${concern.title}</strong><p>${concern.detail}</p></article>`).join('')}
+    ${concerns.map((concern) => `<article class="concern"><strong>${escapeHtml(concern.severity)}: ${escapeHtml(concern.title)}</strong><p>${escapeHtml(concern.detail)}</p><p><b>What to check:</b> ${escapeHtml(concern.check)}</p><p><b>Detected:</b> “${escapeHtml(concern.evidence)}”</p></article>`).join('')}
     ${link}
     <div class="actions"><button class="primary" id="rescan">Scan again</button><button id="clear">Clear</button></div>`;
 
