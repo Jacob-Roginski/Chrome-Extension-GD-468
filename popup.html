@@ -12,9 +12,9 @@
         --line: #303936;
         --paper: #111513;
         --panel: #191e1c;
-        --lime: #d8ff3e;
-        --lime-dark: #a9cc16;
-        --orange: #ff6b35;
+        --accent: #f1f1ed;
+        --accent-muted: #b9bdb9;
+        --warning: #d5d7d2;
       }
 
       body {
@@ -39,7 +39,7 @@
         bottom: -58px;
         width: 150px;
         height: 150px;
-        border: 20px solid var(--lime);
+        border: 20px solid var(--accent);
         border-radius: 50%;
         opacity: 0.12;
         content: "";
@@ -47,7 +47,7 @@
 
       .eyebrow {
         margin: 0 0 9px;
-        color: var(--lime);
+        color: var(--accent);
         font-size: 10px;
         font-weight: 800;
         letter-spacing: 2px;
@@ -94,10 +94,10 @@
         height: 62px;
         flex: 0 0 62px;
         place-items: center;
-        border: 2px solid var(--orange);
+        border: 2px solid var(--warning);
         border-radius: 50%;
-        background: #2b1b16;
-        color: var(--orange);
+        background: #292b29;
+        color: var(--warning);
         font-size: 25px;
         font-weight: 850;
       }
@@ -109,14 +109,14 @@
       .concern {
         margin: 8px 0;
         padding: 12px 13px;
-        border: 1px solid #49332b;
-        border-left: 4px solid var(--orange);
+        border: 1px solid #414542;
+        border-left: 4px solid var(--warning);
         border-radius: 5px;
-        background: #211a18;
+        background: #242725;
       }
 
-      .concern:last-child { border-bottom: 1px solid #49332b; }
-      .concern strong { display: block; margin-bottom: 4px; color: #ffb18f; font-size: 12px; font-weight: 850; letter-spacing: 0.3px; text-transform: uppercase; }
+      .concern:last-child { border-bottom: 1px solid #414542; }
+      .concern strong { display: block; margin-bottom: 4px; color: var(--accent); font-size: 12px; font-weight: 850; letter-spacing: 0.3px; text-transform: uppercase; }
       .concern p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
 
       .actions { display: flex; gap: 8px; margin-top: 17px; }
@@ -133,9 +133,9 @@
         letter-spacing: 0.6px;
         text-transform: uppercase;
       }
-      button.primary { border-color: var(--lime); background: var(--lime); color: #10140f; }
+      button.primary { border-color: var(--accent); background: var(--accent); color: #171918; }
       button:hover { filter: brightness(0.96); }
-      a { color: var(--lime); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+      a { color: var(--accent-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
     </style>
   </head>
   <body>

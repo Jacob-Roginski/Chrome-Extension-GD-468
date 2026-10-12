@@ -24,4 +24,9 @@ automatically uses the active tab, finds a Terms of Service link, fetches that
 document, and reviews it locally. If the page has no matching link, it also
 tries common paths such as `/terms` and `/terms-of-service`.
 
+After a regular site loads, a compact in-page review panel appears
+automatically. Search engines are excluded so normal searching is not
+interrupted. The toolbar popup remains available for the full review and
+manual rescans.
+
 The extension works best on regular web pages. Chrome internal pages and sites that block extension scripts cannot be scanned.
