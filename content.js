@@ -1,4 +1,5 @@
-const TERM_LINK_WORDS = /terms|conditions|legal|user agreement|tos/i;
+const TERM_LINK_WORDS = /terms(?:\s+of\s+service)?|conditions|user agreement|\btos\b/i;
+const TERM_PATHS = ['/terms', '/terms-of-service', '/legal/terms', '/legal/terms-of-service', '/legal'];
 
 const CONCERN_RULES = [
   { title: 'Data sharing and tracking', pattern: /sell|share|disclos|advertis|third[- ]party|tracking|analytics|personal information/i, detail: 'Look for what data is shared, with whom, and whether advertising or analytics partners can combine it.' },
@@ -11,7 +12,13 @@ const CONCERN_RULES = [
 
 function findTermsLink() {
   const links = [...document.querySelectorAll('a[href]')];
-  const match = links.find((link) => TERM_LINK_WORDS.test(`${link.textContent} ${link.getAttribute('href')}`));
+  const match = links
+    .filter((link) => TERM_LINK_WORDS.test(`${link.textContent} ${link.getAttribute('href')}`))
+    .sort((first, second) => {
+      const firstText = `${first.textContent} ${first.getAttribute('href')}`;
+      const secondText = `${second.textContent} ${second.getAttribute('href')}`;
+      return Number(/terms|tos/i.test(secondText)) - Number(/terms|tos/i.test(firstText));
+    })[0];
   return match ? { href: match.href, label: match.textContent.trim() || 'Terms of Service' } : null;
 }
 
@@ -21,26 +28,33 @@ function analyze(text) {
 }
 
 async function scan() {
-  const link = findTermsLink();
+  const pageLink = findTermsLink();
+  const fallbackLinks = TERM_PATHS.map((path) => new URL(path, location.origin).href);
+  const linksToTry = pageLink ? [pageLink] : fallbackLinks.map((href) => ({ href, label: 'Terms of Service' }));
   let text = document.body?.innerText || '';
+  let termsLink = pageLink;
 
-  if (link?.href && link.href !== location.href) {
+  for (const candidate of linksToTry) {
+    if (!candidate.href || candidate.href === location.href) continue;
     try {
-      const response = await fetch(link.href, { credentials: 'include' });
-      if (response.ok) {
-        const html = await response.text();
-        const termsDocument = new DOMParser().parseFromString(html, 'text/html');
-        text = termsDocument.body?.innerText || text;
-      }
+      const response = await fetch(candidate.href, { credentials: 'include' });
+      if (!response.ok) continue;
+      const html = await response.text();
+      const termsDocument = new DOMParser().parseFromString(html, 'text/html');
+      const termsText = termsDocument.body?.innerText?.trim();
+      if (!termsText) continue;
+      text = termsText;
+      termsLink = { href: response.url || candidate.href, label: candidate.label };
+      break;
     } catch (error) {
-      // Some sites block cross-page requests; the visible page remains a useful fallback.
+      // Try the next candidate; the visible page remains a useful fallback.
     }
   }
 
   const result = {
     hostname: location.hostname.replace(/^www\./, ''),
-    termsUrl: link?.href || null,
-    termsLabel: link?.label || null,
+    termsUrl: termsLink?.href || null,
+    termsLabel: termsLink?.label || null,
     ...analyze(text)
   };
   chrome.runtime.sendMessage({ type: 'terms-found', result });
