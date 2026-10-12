@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Terms Lens",
+  "version": "1.0.0",
+  "description": "Finds a site's Terms of Service and highlights common areas to review.",
+  "permissions": [
+    "activeTab",
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "128": "icon.svg"
+  },
+  "action": {
+    "default_title": "Terms Lens",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
