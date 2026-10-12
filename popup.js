@@ -1,5 +1,27 @@
 function sendMessage(tabId, message) {
-  return new Promise((resolve) => chrome.tabs.sendMessage(tabId, message, resolve));
+  return new Promise((resolve) => {
+    chrome.tabs.sendMessage(tabId, message, (response) => {
+      resolve(chrome.runtime.lastError ? null : response);
+    });
+  });
+}
+
+function setFormState(message) {
+  const state = document.querySelector('#form-state');
+  state.textContent = message;
+  state.hidden = !message;
+}
+
+function normalizeSiteUrl(value) {
+  const input = value.trim();
+  const candidate = /^[a-z][a-z\d+.-]*:\/\//i.test(input) ? input : `https://${input}`;
+  const url = new URL(candidate);
+
+  if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) {
+    throw new Error('Enter a regular http or https website URL.');
+  }
+
+  return url.href;
 }
 
 function render(result) {
@@ -32,8 +54,27 @@ function render(result) {
 }
 
 async function init() {
+  document.querySelector('#site-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setFormState('');
+
+    try {
+      const url = normalizeSiteUrl(document.querySelector('#site-url').value);
+      await chrome.tabs.create({ url });
+      window.close();
+    } catch (error) {
+      setFormState(error instanceof TypeError ? 'Enter a valid website URL.' : error.message);
+    }
+  });
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  document.querySelector('#site').textContent = tab?.url ? new URL(tab.url).hostname : 'Current page';
+  let hostname = 'Current page';
+  try {
+    if (tab?.url) hostname = new URL(tab.url).hostname;
+  } catch (error) {
+    hostname = 'Current page';
+  }
+  document.querySelector('#site').textContent = hostname;
   if (!tab?.id) return render(null);
 
   const response = await new Promise((resolve) => chrome.runtime.sendMessage({ type: 'get-analysis', tabId: tab.id }, resolve));

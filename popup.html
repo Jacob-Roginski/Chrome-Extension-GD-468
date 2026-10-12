@@ -59,6 +59,36 @@
 
       .state { color: var(--muted); font: 13px/1.45 Arial, sans-serif; }
 
+      .site-form {
+        display: flex;
+        gap: 7px;
+        margin-bottom: 16px;
+      }
+
+      .site-form label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      .site-form input {
+        min-width: 0;
+        flex: 1;
+        padding: 9px 10px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--ink);
+        font: 12px Arial, sans-serif;
+      }
+
+      .site-form input:focus {
+        border-color: var(--green);
+        outline: 2px solid #cbe7d3;
+      }
+
       .summary {
         display: flex;
         align-items: center;
@@ -107,18 +137,23 @@
       button.primary { border-color: var(--green); background: var(--green); color: white; }
       button:hover { filter: brightness(0.96); }
       a { color: var(--green); font: 700 12px Arial, sans-serif; }
-      }
     </style>
   </head>
+  <body>
     <header>
       <p class="eyebrow">Private, local review</p>
       <h1>Terms Lens</h1>
       <p id="site">Checking this page...</p>
     </header>
     <main>
+      <form id="site-form" class="site-form">
+        <label for="site-url">Site URL to test</label>
+        <input id="site-url" type="url" placeholder="https://example.com" autocomplete="url" required />
+        <button class="primary" type="submit">Test site</button>
+      </form>
+      <p id="form-state" class="state" hidden></p>
       <div id="content" class="state">Looking for a Terms of Service link...</div>
     </main>
     <script src="popup.js"></script>
-    <p>Use this as a starting point for new features.</p>
   </body>
 </html>
