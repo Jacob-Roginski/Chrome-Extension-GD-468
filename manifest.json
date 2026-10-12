@@ -11,7 +11,7 @@
   ],
   "host_permissions": ["<all_urls>"],
   "icons": {
-    "128": "icon.svg"
+    "128": ""
   },
   "action": {
     "default_title": "Terms Lens",
