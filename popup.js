@@ -46,7 +46,17 @@ function render(result) {
 }
 
 async function init() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const requestedTabId = new URLSearchParams(location.search).get('tabId');
+  let tab;
+  if (requestedTabId) {
+    try {
+      tab = await chrome.tabs.get(Number(requestedTabId));
+    } catch (error) {
+      tab = null;
+    }
+  } else {
+    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  }
   let hostname = 'Current page';
   try {
     if (tab?.url) hostname = new URL(tab.url).hostname;
