@@ -1,5 +1,6 @@
 const TERM_LINK_WORDS = /terms(?:\s+of\s+service)?|conditions|user agreement|\btos\b/i;
 const TERM_PATHS = ['/terms', '/terms-of-service', '/legal/terms', '/legal/terms-of-service', '/legal'];
+const TERM_PAGE_WORDS = /\bterms?\b|\bconditions?\b|user agreement|\btos\b/i;
 const SEARCH_ENGINE_HOSTS = new Set([
   'www.google.com', 'google.com', 'www.bing.com', 'bing.com', 'duckduckgo.com',
   'www.duckduckgo.com', 'search.yahoo.com', 'search.brave.com', 'www.baidu.com',
@@ -16,24 +17,81 @@ const CONCERN_RULES = [
   { title: 'Governing law and venue', severity: 'Review', pattern: /(?:governing law|jurisdiction|venue|laws of the (?:state|country)).{0,140}(?:court|dispute|claim|law)/i, detail: 'The agreement names a law or location that may control how disputes are handled.', check: 'Check whether the required court or location is practical for you and whether another clause changes this rule.' }
 ];
 
-function findTermsLink() {
-  const links = [...document.querySelectorAll('a[href]')];
-  const match = links
-    .filter((link) => {
-      try {
-        const href = new URL(link.href);
-        return ['http:', 'https:'].includes(href.protocol) &&
-          TERM_LINK_WORDS.test(`${link.textContent} ${link.getAttribute('href')}`);
-      } catch (error) {
-        return false;
+function findTermsCandidates() {
+  const origin = location.origin;
+  const linkedCandidates = [...document.querySelectorAll('a[href]')].flatMap((link) => {
+    try {
+      const href = new URL(link.href);
+      const linkText = `${link.textContent} ${link.getAttribute('href')}`;
+      if (!['http:', 'https:'].includes(href.protocol) || !TERM_LINK_WORDS.test(linkText)) return [];
+      return [{
+        href: href.href,
+        label: link.textContent.trim() || 'Terms of Service',
+        score: (href.origin === origin ? 20 : 0) + (/\bterms?\b|\btos\b/i.test(linkText) ? 10 : 0)
+      }];
+    } catch (error) {
+      return [];
+    }
+  });
+  const pathCandidates = TERM_PATHS.map((path) => ({
+    href: new URL(path, location.origin).href,
+    label: 'Terms of Service',
+    score: 15
+  }));
+  const unique = new Map();
+  [...linkedCandidates, ...pathCandidates].forEach((candidate) => {
+    if (!unique.has(candidate.href) || unique.get(candidate.href).score < candidate.score) {
+      unique.set(candidate.href, candidate);
+    }
+  });
+  return [...unique.values()].sort((first, second) => second.score - first.score);
+}
+
+function extractPageText(html) {
+  const pageDocument = new DOMParser().parseFromString(html, 'text/html');
+  const title = pageDocument.title || '';
+  const headings = [...pageDocument.querySelectorAll('h1, h2')]
+    .map((heading) => heading.textContent)
+    .join(' ');
+  const text = pageDocument.body?.innerText?.replace(/\s+/g, ' ').trim() || '';
+  return { title, headings, text };
+}
+
+function isTermsPage(page) {
+  const header = `${page.title} ${page.headings}`;
+  const body = page.text.slice(0, 5000);
+  const legalSignals = [
+    /governing law|jurisdiction|arbitration|limitation of liability/i,
+    /intellectual property|user content|account termination/i,
+    /privacy|personal information|third[- ]party/i
+  ];
+  const hasTermsHeading = TERM_PAGE_WORDS.test(header);
+  const hasTermsPhrase = /terms of service|terms and conditions|these terms|user agreement/i.test(body);
+  const legalSignalCount = legalSignals.filter((signal) => signal.test(body)).length;
+  return page.text.length >= 300 &&
+    (hasTermsHeading || hasTermsPhrase) &&
+    legalSignalCount >= 2;
+}
+
+async function findTermsPage() {
+  for (const candidate of findTermsCandidates()) {
+    if (candidate.href === location.href) continue;
+    try {
+      const response = await fetch(candidate.href, { credentials: 'include' });
+      if (!response.ok) continue;
+      const page = extractPageText(await response.text());
+      if (isTermsPage(page)) {
+        return {
+          href: response.url || candidate.href,
+          label: candidate.label,
+          text: page.text
+        };
       }
-    })
-    .sort((first, second) => {
-      const firstText = `${first.textContent} ${first.getAttribute('href')}`;
-      const secondText = `${second.textContent} ${second.getAttribute('href')}`;
-      return Number(/terms|tos/i.test(secondText)) - Number(/terms|tos/i.test(firstText));
-    })[0];
-  return match ? { href: match.href, label: match.textContent.trim() || 'Terms of Service' } : null;
+    } catch (error) {
+      // Try the next official candidate if this page blocks extension requests.
+    }
+  }
+  return null;
 }
 
 function analyze(text) {
@@ -83,6 +141,7 @@ function showInlineReview(result) {
       box-sizing: border-box; padding: 16px; border: 1px solid #555b57;
       border-radius: 8px; background: #171a18; color: #f1f1ed;
       box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+      cursor: pointer;
       font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -100,6 +159,9 @@ function showInlineReview(result) {
   `;
   const panel = document.createElement('div');
   panel.className = 'panel';
+  panel.setAttribute('role', 'button');
+  panel.setAttribute('tabindex', '0');
+  panel.setAttribute('aria-label', 'Open the full Terms Lens review');
   panel.innerHTML = `
     <div class="top"><div><p class="label">Terms Lens</p><h2>Site review complete</h2></div><button class="close" aria-label="Dismiss">×</button></div>
     <div class="score"><strong class="number">${flags}</strong><span>${flags === 1 ? 'review area flagged' : 'review areas flagged'}</span></div>
@@ -108,33 +170,29 @@ function showInlineReview(result) {
     ${result.termsUrl ? `<a href="${escapeHtml(result.termsUrl)}" target="_blank" rel="noreferrer">Open Terms ↗</a>` : ''}
   `;
   root.append(style, panel);
+  const openReview = () => {
+    chrome.runtime.sendMessage({ type: 'open-review' });
+    host.remove();
+  };
+  panel.addEventListener('click', (event) => {
+    if (event.target.closest('a, button')) return;
+    openReview();
+  });
+  panel.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openReview();
+    }
+  });
   panel.querySelector('.close').addEventListener('click', () => host.remove());
   document.documentElement.append(host);
 }
 
 async function scan() {
-  const pageLink = findTermsLink();
-  const fallbackLinks = TERM_PATHS.map((path) => new URL(path, location.origin).href);
-  const linksToTry = pageLink ? [pageLink] : fallbackLinks.map((href) => ({ href, label: 'Terms of Service' }));
   let text = document.body?.innerText || '';
-  let termsLink = pageLink;
-
-  for (const candidate of linksToTry) {
-    if (!candidate.href || candidate.href === location.href) continue;
-    try {
-      const response = await fetch(candidate.href, { credentials: 'include' });
-      if (!response.ok) continue;
-      const html = await response.text();
-      const termsDocument = new DOMParser().parseFromString(html, 'text/html');
-      const termsText = termsDocument.body?.innerText?.trim();
-      if (!termsText) continue;
-      text = termsText;
-      termsLink = { href: response.url || candidate.href, label: candidate.label };
-      break;
-    } catch (error) {
-      // Try the next candidate; the visible page remains a useful fallback.
-    }
-  }
+  const termsPage = await findTermsPage();
+  const termsLink = termsPage ? { href: termsPage.href, label: termsPage.label } : null;
+  if (termsPage) text = termsPage.text;
 
   const result = {
     hostname: location.hostname.replace(/^www\./, ''),

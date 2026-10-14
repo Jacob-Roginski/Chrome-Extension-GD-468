@@ -29,6 +29,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'clear-analysis' && message.tabId) {
     analyses.delete(message.tabId);
   }
+
+  if (message.type === 'open-review' && sender.tab?.id) {
+    const url = new URL(chrome.runtime.getURL('popup.html'));
+    url.searchParams.set('tabId', String(sender.tab.id));
+    chrome.tabs.create({ url: url.toString() });
+  }
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => analyses.delete(tabId));
