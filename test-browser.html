@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Terms Lens Test Browser</title>
+    <link rel="stylesheet" href="test-browser.css" />
+  </head>
+  <body>
+    <header class="browser-bar">
+      <div class="brand">Terms Lens <span>Test Browser</span></div>
+      <form id="address-form" class="address-bar">
+        <span aria-hidden="true">⌕</span>
+        <input id="address" value="https://example.com" aria-label="Page URL to test" />
+      </form>
+      <button id="scan" class="scan-button">Scan page</button>
+    </header>
+    <main class="workspace">
+      <section class="page-area">
+        <div class="tabs">
+          <span id="status">Enter a URL and press Enter or Scan page</span>
+        </div>
+        <iframe id="page" title="Test page preview"></iframe>
+      </section>
+      <aside class="review">
+        <p class="eyebrow">Private, local review</p>
+        <h1>Review</h1>
+        <p id="site" class="site">demo.terms-lens.test</p>
+        <div id="results" class="state">Choose a sample page and click Scan page.</div>
+      </aside>
+    </main>
+    <script src="scanner.js"></script>
+    <script src="test-browser.js"></script>
+  </body>
+</html>
