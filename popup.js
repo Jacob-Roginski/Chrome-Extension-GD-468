@@ -25,11 +25,20 @@ function render(result) {
 
   const concerns = result.concerns || [];
   const link = result.termsUrl ? `<p><a href="${escapeHtml(result.termsUrl)}" target="_blank">Open ${escapeHtml(result.termsLabel || 'Terms of Service')} ↗</a></p>` : '<p class="state">No obvious Terms link was found on this page.</p>';
+  const tosdr = result.tosdr?.name ? `
+    <section class="tosdr">
+      <div class="tosdr-head"><span class="tosdr-label">ToS;DR snapshot</span><span class="tosdr-rating">${escapeHtml(result.tosdr.rating)}</span></div>
+      <p class="tosdr-name">${escapeHtml(result.tosdr.name)}</p>
+      <p class="tosdr-meta">${result.tosdr.reviewed ? 'Comprehensively reviewed' : 'Community data available'} · ${result.tosdr.points.length} highlighted point${result.tosdr.points.length === 1 ? '' : 's'}</p>
+      ${result.tosdr.points.length ? `<ul class="tosdr-points">${result.tosdr.points.slice(0, 3).map((point) => `<li>${escapeHtml(point.title || point.caseTitle || 'Reviewed point')}</li>`).join('')}</ul>` : ''}
+      <a href="${escapeHtml(result.tosdr.sourceUrl)}" target="_blank" rel="noreferrer">View ToS;DR details ↗</a>
+    </section>` : result.tosdr?.error ? `<p class="state">${escapeHtml(result.tosdr.error)}</p>` : '';
   content.innerHTML = `
     <div class="summary">
       <div class="score">${concerns.length}<small>flags</small></div>
       <div><strong>${concerns.length ? 'Worth a closer read' : 'No common flags found'}</strong><span>Based on ${result.analyzedCharacters.toLocaleString()} page characters</span></div>
     </div>
+    ${tosdr}
     ${concerns.map((concern) => `<article class="concern"><strong>${escapeHtml(concern.severity)}: ${escapeHtml(concern.title)}</strong><p>${escapeHtml(concern.detail)}</p><p><b>What to check:</b> ${escapeHtml(concern.check)}</p><p><b>Detected:</b> “${escapeHtml(concern.evidence)}”</p></article>`).join('')}
     ${link}
     <div class="actions"><button class="primary" id="rescan">Scan again</button><button id="clear">Clear</button></div>`;

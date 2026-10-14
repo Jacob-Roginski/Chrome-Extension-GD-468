@@ -7,7 +7,14 @@ Terms Lens finds a site's Terms of Service page and flags common areas worth a c
 - `manifest.json` - Extension configuration and permissions
 - `background.js` - Notifications and tab-level analysis cache
 - `content.js` - Terms link discovery and local text analysis
+- `tosdr.js` - Optional ToS;DR service lookup and summary data
 - `popup.html` / `popup.js` - Review panel
+
+When a matching service is found, the popup also shows a small ToS;DR snapshot
+with its rating, review status, highlighted points, and a link to the source
+service page. ToS;DR data is supplementary; the extension's local findings
+remain the primary review. The integration uses the documented
+[ToS;DR API](https://docs.tosdr.org/developer/tos-dr-developers).
 
 ## Load in Chrome
 
@@ -16,6 +23,22 @@ Terms Lens finds a site's Terms of Service page and flags common areas worth a c
 3. Click **Load unpacked**.
 4. Select this repository folder:
    `/workspaces/Chrome-Extension-GD-468`
+
+## Test pages locally without loading the extension
+
+Start the Codespace-only test browser from the repository:
+
+```bash
+python3 test-browser-server.py
+```
+
+Open `http://127.0.0.1:8765/test-browser.html` in the Codespace browser, enter
+any public `http://` or `https://` page URL, and click **Scan page**. The local
+server fetches the page, follows likely same-site Terms links, and the browser
+applies the exact shared concern rules used by the extension. The page preview
+and results stay inside the Codespace test browser; nothing is uploaded to a
+third-party analysis service. Sites that require login or block automated
+requests may not be testable.
 
 ## Automatic site testing
 
