@@ -118,42 +118,40 @@ function showInlineReview(result) {
   style.textContent = `
     :host { all: initial; }
     .panel {
-      position: fixed; z-index: 2147483647; right: 20px; bottom: 20px; width: 286px;
-      box-sizing: border-box; padding: 16px; border: 1px solid #555b57;
-      border-radius: 8px; background: #171a18; color: #f1f1ed;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+      position: fixed; z-index: 2147483647; right: 22px; bottom: 22px; width: 312px;
+      box-sizing: border-box; padding: 18px; border: 1px solid #d6d0cb;
+      border-radius: 14px; background: #f7f5f3; color: #1a1f25;
+      box-shadow: 0 16px 42px rgba(26, 31, 37, .2);
       cursor: pointer;
-      font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font: 13px/1.4 Inter, "Segoe UI", Helvetica, Arial, sans-serif;
+      letter-spacing: -.02em;
     }
     .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .label { margin: 0 0 5px; color: #aeb4ae; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
-    h2 { margin: 0; font-size: 17px; letter-spacing: -.3px; }
-    .close { border: 0; background: transparent; color: #aeb4ae; cursor: pointer; font-size: 20px; line-height: 1; padding: 0; }
-    .score { display: flex; align-items: center; gap: 9px; margin-top: 15px; padding: 11px; border: 1px solid #3f4541; border-radius: 5px; background: #222624; }
-    .number { color: #f1f1ed; font-size: 23px; font-weight: 800; }
-    .score span { color: #b8beb8; font-size: 11px; }
-    .details { margin: 12px 0 0; color: #b8beb8; font-size: 11px; }
-    .tosdr { margin-top: 12px; padding-top: 10px; border-top: 1px solid #383d39; }
-    .tosdr strong { display: block; color: #f1f1ed; font-size: 11px; }
-    .tosdr span { display: block; margin-top: 3px; color: #aeb4ae; font-size: 10px; }
-    .tosdr a { margin-top: 6px; }
-    .issue { margin-top: 10px; padding-top: 10px; border-top: 1px solid #383d39; }
-    .issue strong { display: block; color: #f1f1ed; font-size: 11px; }
-    .issue span { display: block; margin-top: 3px; color: #aeb4ae; font-size: 10px; line-height: 1.35; }
-    a { display: inline-block; margin-top: 12px; color: #f1f1ed; font-size: 11px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+    .label { margin: 0 0 6px; color: #565f5b; font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
+    h2 { margin: 0; color: #1a1f25; font-size: 19px; line-height: 1.1; letter-spacing: -.01em; }
+    .close { border: 0; background: transparent; color: #565f5b; cursor: pointer; font-size: 22px; line-height: .8; padding: 2px; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .metric { min-width: 0; padding: 13px 12px 12px; border: 1px solid #d6d0cb; border-radius: 10px; background: #f3f0ee; }
+    .metric.rating { border-color: #ef6a6d; background: #fff0ef; }
+    .metric-label { display: block; color: #565f5b; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .number, .rating-value { display: block; margin-top: 5px; color: #1a1f25; font-size: 28px; line-height: 1; font-weight: 900; letter-spacing: -.06em; }
+    .rating-value { color: #c94f56; font-size: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .footer { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid #d6d0cb; color: #565f5b; font-size: 11px; letter-spacing: .01em; }
+    .footer strong { color: #1a1f25; }
   `;
   const panel = document.createElement('div');
   panel.className = 'panel';
   panel.setAttribute('role', 'button');
   panel.setAttribute('tabindex', '0');
   panel.setAttribute('aria-label', 'Open the full FinePrint review');
+  const rating = result.tosdr?.rating || 'N/A';
   panel.innerHTML = `
-    <div class="top"><div><p class="label">ToS;DR first · FinePrint second</p><h2>Site review complete</h2></div><button class="close" aria-label="Dismiss">×</button></div>
-    <div class="score"><strong class="number">${flags}</strong><span>${flags === 1 ? 'review area flagged' : 'review areas flagged'}</span></div>
-    ${result.tosdr?.name ? `<div class="tosdr"><strong>${escapeHtml(result.tosdr.name)} · rating ${escapeHtml(result.tosdr.rating)}</strong><span>${result.tosdr.reviewed ? 'ToS;DR has comprehensively reviewed this service.' : 'ToS;DR community data is available for this service.'}</span><a href="${escapeHtml(result.tosdr.sourceUrl)}" target="_blank" rel="noreferrer">View ToS;DR details ↗</a></div>` : ''}
-    <p class="details">Local FinePrint review: ${result.termsUrl ? 'Terms were found and examined for additional clause-level flags.' : 'No Terms page was found; the visible page was reviewed.'}</p>
-    ${result.concerns.slice(0, 3).map((concern) => `<div class="issue"><strong>${escapeHtml(concern.severity)}: ${escapeHtml(concern.title)}</strong><span>${escapeHtml(concern.check)}</span></div>`).join('')}
-    ${result.termsUrl ? `<a href="${escapeHtml(result.termsUrl)}" target="_blank" rel="noreferrer">Open Terms ↗</a>` : ''}
+    <div class="top"><div><p class="label">FinePrint review</p><h2>Site review complete</h2></div><button class="close" aria-label="Dismiss">×</button></div>
+    <div class="metrics">
+      <div class="metric"><span class="metric-label">Issues found</span><strong class="number">${flags}</strong></div>
+      <div class="metric rating"><span class="metric-label">ToS;DR rating</span><strong class="rating-value">${escapeHtml(rating)}</strong></div>
+    </div>
+    <p class="footer">${result.tosdr?.name ? `<strong>${escapeHtml(result.tosdr.name)}</strong> · click to open the full review` : 'Click to open the full review'}</p>
   `;
   root.append(style, panel);
   const openReview = () => {
