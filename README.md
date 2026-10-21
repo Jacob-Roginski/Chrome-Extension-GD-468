@@ -1,6 +1,6 @@
-# Terms Lens
+# FinePrint
 
-Terms Lens finds a site's Terms of Service page and flags common areas worth a closer read. Analysis runs locally in the extension; page text is not sent to a server. It is an educational review aid, not legal advice.
+FinePrint finds a site's Terms of Service page and flags common areas worth a closer read. Analysis runs locally in the extension; page text is not sent to a server. It is an educational review aid, not legal advice.
 
 ## Files
 
@@ -10,10 +10,10 @@ Terms Lens finds a site's Terms of Service page and flags common areas worth a c
 - `tosdr.js` - Optional ToS;DR service lookup and summary data
 - `popup.html` / `popup.js` - Review panel
 
-When a matching service is found, the popup also shows a small ToS;DR snapshot
+When a matching service is found, the popup leads with a small ToS;DR snapshot
 with its rating, review status, highlighted points, and a link to the source
-service page. ToS;DR data is supplementary; the extension's local findings
-remain the primary review. The integration uses the documented
+service page. The extension's local clause matching appears underneath as a
+secondary, additional review. The integration uses the documented
 [ToS;DR API](https://docs.tosdr.org/developer/tos-dr-developers).
 
 ## Load in Chrome
@@ -42,7 +42,7 @@ requests may not be testable.
 
 ## Automatic site testing
 
-Open any regular website and click the Terms Lens toolbar icon. The extension
+Open any regular website and click the FinePrint toolbar icon. The extension
 automatically uses the active tab, discovers the site's Terms of Service link,
 fetches and validates the linked document, and reviews that document locally.
 If the page has no usable matching link, it also checks official same-site

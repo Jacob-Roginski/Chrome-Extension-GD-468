@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.notifications.create(`terms-${sender.tab.id}`, {
         type: 'basic',
         iconUrl: 'icon.svg',
-        title: 'Terms Lens found the Terms',
+        title: 'FinePrint found the Terms',
         message: `${result.concernCount} review area${result.concernCount === 1 ? '' : 's'} found on ${result.hostname}.`
       });
     }

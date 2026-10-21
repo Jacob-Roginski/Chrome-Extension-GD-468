@@ -88,7 +88,7 @@ async function findToSDrData() {
   try {
     return await TermsLensToSDr.lookup(location.hostname);
   } catch (error) {
-    console.warn('Terms Lens could not load ToS;DR data.', error);
+    console.warn('FinePrint could not load ToS;DR data.', error);
     return { error: 'ToS;DR data is unavailable right now.' };
   }
 }
@@ -133,6 +133,10 @@ function showInlineReview(result) {
     .number { color: #f1f1ed; font-size: 23px; font-weight: 800; }
     .score span { color: #b8beb8; font-size: 11px; }
     .details { margin: 12px 0 0; color: #b8beb8; font-size: 11px; }
+    .tosdr { margin-top: 12px; padding-top: 10px; border-top: 1px solid #383d39; }
+    .tosdr strong { display: block; color: #f1f1ed; font-size: 11px; }
+    .tosdr span { display: block; margin-top: 3px; color: #aeb4ae; font-size: 10px; }
+    .tosdr a { margin-top: 6px; }
     .issue { margin-top: 10px; padding-top: 10px; border-top: 1px solid #383d39; }
     .issue strong { display: block; color: #f1f1ed; font-size: 11px; }
     .issue span { display: block; margin-top: 3px; color: #aeb4ae; font-size: 10px; line-height: 1.35; }
@@ -142,11 +146,12 @@ function showInlineReview(result) {
   panel.className = 'panel';
   panel.setAttribute('role', 'button');
   panel.setAttribute('tabindex', '0');
-  panel.setAttribute('aria-label', 'Open the full Terms Lens review');
+  panel.setAttribute('aria-label', 'Open the full FinePrint review');
   panel.innerHTML = `
-    <div class="top"><div><p class="label">Terms Lens</p><h2>Site review complete</h2></div><button class="close" aria-label="Dismiss">×</button></div>
+    <div class="top"><div><p class="label">ToS;DR first · FinePrint second</p><h2>Site review complete</h2></div><button class="close" aria-label="Dismiss">×</button></div>
     <div class="score"><strong class="number">${flags}</strong><span>${flags === 1 ? 'review area flagged' : 'review areas flagged'}</span></div>
-    <p class="details">${result.termsUrl ? 'Terms were found and examined locally.' : 'No Terms page was found; the visible page was reviewed.'}</p>
+    ${result.tosdr?.name ? `<div class="tosdr"><strong>${escapeHtml(result.tosdr.name)} · rating ${escapeHtml(result.tosdr.rating)}</strong><span>${result.tosdr.reviewed ? 'ToS;DR has comprehensively reviewed this service.' : 'ToS;DR community data is available for this service.'}</span><a href="${escapeHtml(result.tosdr.sourceUrl)}" target="_blank" rel="noreferrer">View ToS;DR details ↗</a></div>` : ''}
+    <p class="details">Local FinePrint review: ${result.termsUrl ? 'Terms were found and examined for additional clause-level flags.' : 'No Terms page was found; the visible page was reviewed.'}</p>
     ${result.concerns.slice(0, 3).map((concern) => `<div class="issue"><strong>${escapeHtml(concern.severity)}: ${escapeHtml(concern.title)}</strong><span>${escapeHtml(concern.check)}</span></div>`).join('')}
     ${result.termsUrl ? `<a href="${escapeHtml(result.termsUrl)}" target="_blank" rel="noreferrer">Open Terms ↗</a>` : ''}
   `;
