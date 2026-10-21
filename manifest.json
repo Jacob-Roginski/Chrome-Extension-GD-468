@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Terms Lens",
+  "name": "FinePrint",
   "version": "1.0.0",
   "description": "Finds a site's Terms of Service and highlights common areas to review.",
   "permissions": [
@@ -14,7 +14,7 @@
     "128": "icon.svg"
   },
   "action": {
-    "default_title": "Terms Lens",
+    "default_title": "FinePrint",
     "default_popup": "popup.html"
   },
   "background": {

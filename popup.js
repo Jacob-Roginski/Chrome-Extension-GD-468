@@ -24,24 +24,38 @@ function render(result) {
   }
 
   const concerns = result.concerns || [];
-  const link = result.termsUrl ? `<p><a href="${escapeHtml(result.termsUrl)}" target="_blank">Open ${escapeHtml(result.termsLabel || 'Terms of Service')} ↗</a></p>` : '<p class="state">No obvious Terms link was found on this page.</p>';
-  const tosdr = result.tosdr?.name ? `
-    <section class="tosdr">
-      <div class="tosdr-head"><span class="tosdr-label">ToS;DR snapshot</span><span class="tosdr-rating">${escapeHtml(result.tosdr.rating)}</span></div>
-      <p class="tosdr-name">${escapeHtml(result.tosdr.name)}</p>
-      <p class="tosdr-meta">${result.tosdr.reviewed ? 'Comprehensively reviewed' : 'Community data available'} · ${result.tosdr.points.length} highlighted point${result.tosdr.points.length === 1 ? '' : 's'}</p>
-      ${result.tosdr.points.length ? `<ul class="tosdr-points">${result.tosdr.points.slice(0, 3).map((point) => `<li>${escapeHtml(point.title || point.caseTitle || 'Reviewed point')}</li>`).join('')}</ul>` : ''}
-      <a href="${escapeHtml(result.tosdr.sourceUrl)}" target="_blank" rel="noreferrer">View ToS;DR details ↗</a>
-    </section>` : result.tosdr?.error ? `<p class="state">${escapeHtml(result.tosdr.error)}</p>` : '';
+  const analyzedCharacters = Number.isFinite(result.analyzedCharacters) ? result.analyzedCharacters : 0;
+  const link = result.termsUrl ? `<p class="terms-notice">Terms analyzed: <a class="terms-link" href="${escapeHtml(result.termsUrl)}" target="_blank" rel="noreferrer">${escapeHtml(result.termsLabel || 'Open Terms')}</a></p>` : '<p class="terms-notice">No obvious Terms link was found on this page.</p>';
+  const summaryTitle = concerns.length ? 'Flags worth<br>reading' : 'No common<br>flags found';
+  const safeFindings = concerns.length
+    ? concerns.map((concern) => `
+        <li class="finding">
+          <h3>${escapeHtml(concern.title)}</h3>
+          <p>${escapeHtml(concern.detail)}</p>
+        </li>
+      `).join('')
+    : `
+      <li class="finding">
+        <h3>No common flags found</h3>
+        <p>Nothing in the visible page text triggered the extension's local clause checks.</p>
+      </li>
+    `;
+
   content.innerHTML = `
-    <div class="summary">
-      <div class="score">${concerns.length}<small>flags</small></div>
-      <div><strong>${concerns.length ? 'Worth a closer read' : 'No common flags found'}</strong><span>Based on ${result.analyzedCharacters.toLocaleString()} page characters</span></div>
+    <div class="summary-panel">
+      <div class="score">${concerns.length}</div>
+      <div class="summary-copy">
+        <h2>${summaryTitle}</h2>
+        <p>Based on ${analyzedCharacters.toLocaleString()} page characters</p>
+      </div>
     </div>
-    ${tosdr}
-    ${concerns.map((concern) => `<article class="concern"><strong>${escapeHtml(concern.severity)}: ${escapeHtml(concern.title)}</strong><p>${escapeHtml(concern.detail)}</p><p><b>What to check:</b> ${escapeHtml(concern.check)}</p><p><b>Detected:</b> “${escapeHtml(concern.evidence)}”</p></article>`).join('')}
+    <p class="section-label">01 / key findings</p>
+    <ul class="findings">${safeFindings}</ul>
     ${link}
-    <div class="actions"><button class="primary" id="rescan">Scan again</button><button id="clear">Clear</button></div>`;
+    <div class="actions">
+      <button class="primary" id="rescan">Scan again</button>
+      <button id="clear">Clear</button>
+    </div>`;
 
   document.querySelector('#rescan').addEventListener('click', async () => {
     content.innerHTML = '<p class="state">Scanning this page...</p>';

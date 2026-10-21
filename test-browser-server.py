@@ -1,4 +1,4 @@
-"""Codespace-only local proxy for the Terms Lens test browser."""
+"""Codespace-only local proxy for the FinePrint test browser."""
 
 from html.parser import HTMLParser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -151,5 +151,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("Terms Lens Test Browser: http://127.0.0.1:8765/test-browser.html")
+    print("FinePrint Test Browser: http://127.0.0.1:8765/test-browser.html")
     ThreadingHTTPServer(("127.0.0.1", 8765), Handler).serve_forever()
